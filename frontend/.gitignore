@@ -8,9 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist is committed for standalone Python hosting (e.g. WispByte)
 dist-ssr
 *.local
+
 
 # Editor directories and files
 .vscode/*

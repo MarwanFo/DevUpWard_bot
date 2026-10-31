@@ -27,9 +27,10 @@ data/*.db-wal
 
 # Node & Frontend
 node_modules/
-dist/
 dist-ssr/
 *.local
+!frontend/dist/
+
 
 # IDE & OS
 .vscode/
