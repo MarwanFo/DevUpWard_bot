@@ -121,7 +121,18 @@ async def run_tests():
         assert del_inbox.status_code == 204
         print(f"✅ 13. DELETE /api/v1/inbox/{submission_id} (Admin) - OK (Cleaned up test submission)")
 
-    print("\n🎉 ALL 13 BACKEND API & INTEGRATION TESTS PASSED PERFECTLY!\n")
+        # 14. Cloudinary Upload Endpoint security & config check
+        upload_no_auth = await client.post("/api/v1/upload/image", files={"file": ("test.png", b"fakecontent", "image/png")})
+        assert upload_no_auth.status_code == 401
+        print("✅ 14. POST /api/v1/upload/image without auth -> 401 Unauthorized (Security verified)")
+
+        upload_auth = await client.post("/api/v1/upload/image", files={"file": ("test.png", b"fakecontent", "image/png")}, headers=admin_headers)
+        assert upload_auth.status_code == 400  # Expect 400 because Cloudinary keys are placeholders
+        assert "Cloudinary is not configured" in upload_auth.json()["detail"]
+        print("✅ 15. POST /api/v1/upload/image with auth -> 400 Bad Request ('Cloudinary is not configured' gracefully handled)")
+
+    print("\n🎉 ALL 15 BACKEND API & INTEGRATION TESTS PASSED PERFECTLY!\n")
+
 
 
 if __name__ == "__main__":

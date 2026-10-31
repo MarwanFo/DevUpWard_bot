@@ -6,6 +6,7 @@ from app.api.routers.stats import router as stats_router
 from app.api.routers.settings import router as settings_router
 from app.api.routers.bot import router as bot_router
 from app.api.routers.inbox import router as inbox_router
+from app.api.routers.upload import router as upload_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -16,6 +17,8 @@ api_router.include_router(stats_router)
 api_router.include_router(settings_router)
 api_router.include_router(bot_router)
 api_router.include_router(inbox_router)
+api_router.include_router(upload_router)
+
 
 __all__ = ["api_router"]
 

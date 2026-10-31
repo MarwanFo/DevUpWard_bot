@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, FolderGit2 } from 'lucide-react';
 import { Project } from '../types';
+import ImageUpload from './ImageUpload';
+
 
 interface ProjectModalProps {
   project?: Project | null;
@@ -226,16 +228,15 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Banner Image / Screenshot URL</label>
-            <input
-              type="url"
-              value={formData.banner_url || ''}
-              onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
-              placeholder="https://images.unsplash.com/..."
-            />
-          </div>
+          {/* Cloudinary Banner Upload */}
+          <ImageUpload
+            label="Project Banner / Screenshot"
+            value={formData.banner_url}
+            onChange={(url) => setFormData({ ...formData, banner_url: url })}
+            folder="projects"
+            aspectRatio="banner"
+          />
+
 
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">

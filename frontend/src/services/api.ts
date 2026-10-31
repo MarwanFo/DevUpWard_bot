@@ -64,7 +64,24 @@ export const ApiService = {
   updateInboxStatus: (id: number, status: string) =>
     api.patch<ContactSubmission>(`/inbox/${id}/status`, { status }),
   deleteInboxItem: (id: number) => api.delete(`/inbox/${id}`),
+
+  // Media / Cloudinary Uploads
+  uploadImage: (file: File, folder: string = 'showcase') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+    return api.post<{ success: boolean; url: string; public_id: string }>(
+      '/upload/image',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  },
 };
+
 
 export default ApiService;
 

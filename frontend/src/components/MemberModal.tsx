@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, User } from 'lucide-react';
 import { TeamMember } from '../types';
+import ImageUpload from './ImageUpload';
+
 
 
 interface MemberModalProps {
@@ -133,28 +135,26 @@ export const MemberModal: React.FC<MemberModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Avatar Image URL</label>
-              <input
-                type="url"
-                value={formData.avatar_url || ''}
-                onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
-                placeholder="https://images.unsplash.com/..."
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Discord User ID (Optional)</label>
-              <input
-                type="text"
-                value={formData.discord_id || ''}
-                onChange={(e) => setFormData({ ...formData, discord_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
-                placeholder="123456789012345678"
-              />
-            </div>
+          {/* Cloudinary Avatar Upload */}
+          <ImageUpload
+            label="Avatar Photo"
+            value={formData.avatar_url}
+            onChange={(url) => setFormData({ ...formData, avatar_url: url })}
+            folder="avatars"
+            aspectRatio="square"
+          />
+
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1">Discord User ID (Optional)</label>
+            <input
+              type="text"
+              value={formData.discord_id || ''}
+              onChange={(e) => setFormData({ ...formData, discord_id: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+              placeholder="123456789012345678"
+            />
           </div>
+
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>

@@ -14,3 +14,4 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host '🐍 
 Write-Host "⚛️ Starting Frontend Vite Dev Server..." -ForegroundColor Green
 Set-Location frontend
 npm run dev
+

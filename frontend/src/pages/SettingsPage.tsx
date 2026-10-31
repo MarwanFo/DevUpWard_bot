@@ -246,8 +246,61 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 4: Security & Command Sync */}
+          {/* Section 4: Cloudinary Media Storage */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <h3 className="font-semibold text-white text-sm">
+                ☁️ Cloudinary Media Storage (Direct Photo Uploads)
+              </h3>
+              <a
+                href="https://cloudinary.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+              >
+                Get Free Cloudinary Keys &rarr;
+              </a>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Cloud Name</label>
+                <input
+                  type="text"
+                  value={settingsDict.cloudinary_cloud_name || ''}
+                  onChange={(e) => handleChange('cloudinary_cloud_name', e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. devupward"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">API Key</label>
+                <input
+                  type="text"
+                  value={settingsDict.cloudinary_api_key || ''}
+                  onChange={(e) => handleChange('cloudinary_api_key', e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. 123456789012345"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">API Secret</label>
+                <input
+                  type="password"
+                  value={settingsDict.cloudinary_api_secret || ''}
+                  onChange={(e) => handleChange('cloudinary_api_secret', e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
+                  placeholder="••••••••••••••••••••••••"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 5: Security & Command Sync */}
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+
             <h3 className="font-semibold text-white text-sm border-b border-slate-800 pb-2">
               🔐 Admin Security & Discord Synchronization
             </h3>

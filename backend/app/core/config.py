@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     TEAM_MOTTO: str = "Building the future, one hackathon at a time"
     BRAND_COLOR: str = "#5865F2"
 
+    # Cloudinary Image Storage
+    CLOUDINARY_CLOUD_NAME: Optional[str] = None
+    CLOUDINARY_API_KEY: Optional[str] = None
+    CLOUDINARY_API_SECRET: Optional[str] = None
+
+
 
 settings = Settings()
 

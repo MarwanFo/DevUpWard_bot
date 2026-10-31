@@ -14,3 +14,4 @@ start cmd /k "call backend\venv\Scripts\activate.bat && python backend\app\main.
 echo [*] Launching React Frontend...
 cd frontend
 npm run dev
+

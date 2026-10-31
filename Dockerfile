@@ -46,3 +46,4 @@ EXPOSE 8000
 
 # Run unified FastAPI + discord.py process
 CMD ["python", "backend/app/main.py"]
+
