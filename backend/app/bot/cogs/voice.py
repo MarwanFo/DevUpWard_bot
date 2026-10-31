@@ -46,7 +46,7 @@ class Voice(commands.Cog, name="Voice 24/7"):
         except Exception as e:
             logger.error(f"Failed to auto-join initial voice channel {channel_id}: {e}")
 
-    async def _ensure_connected(self, channel: discord.VoiceChannel) -> Optional[discord.VoiceClient]:
+    async def _ensure_connected(self, channel: discord.VoiceChannel) -> tuple[Optional[discord.VoiceClient], Optional[str]]:
         """Ensure bot is connected to the specified voice channel."""
         try:
             guild = channel.guild
@@ -55,12 +55,14 @@ class Voice(commands.Cog, name="Voice 24/7"):
             if vc is not None:
                 if vc.channel and vc.channel.id != channel.id:
                     await vc.move_to(channel)
-                return vc
+                return vc, None
             else:
-                return await channel.connect(self_deaf=True)
+                new_vc = await channel.connect(self_deaf=True)
+                return new_vc, None
         except Exception as e:
-            logger.error(f"Error ensuring connection to voice channel {channel.id}: {e}")
-            return None
+            err_msg = str(e)
+            logger.error(f"Error ensuring connection to voice channel {channel.id}: {err_msg}")
+            return None, err_msg
 
     @tasks.loop(seconds=20)
     async def voice_reconnect_loop(self):
@@ -127,11 +129,12 @@ class Voice(commands.Cog, name="Voice 24/7"):
             return
 
         try:
-            vc = await self._ensure_connected(target_channel)
+            vc, err = await self._ensure_connected(target_channel)
             if not vc:
+                err_detail = f"\n\n*Error details:* `{err}`" if err else ""
                 embed = create_base_embed(
                     title="❌ Connection Failed",
-                    description=f"Could not connect to {target_channel.mention}. Please check bot permissions (`Connect`, `Speak`).",
+                    description=f"Could not connect to {target_channel.mention}. Please ensure the bot has **Connect** and **Speak** permissions.{err_detail}",
                     color=discord.Color.red(),
                 )
                 await interaction.followup.send(embed=embed)
