@@ -157,3 +157,4 @@ class ProjectsCog(commands.Cog, name="Project Showroom"):
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(ProjectsCog(bot))
+

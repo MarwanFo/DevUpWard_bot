@@ -170,3 +170,4 @@ class HospitalityCog(commands.Cog, name="Hospitality"):
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(HospitalityCog(bot))
+

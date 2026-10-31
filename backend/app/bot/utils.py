@@ -51,3 +51,4 @@ def create_base_embed(
     )
     embed.set_footer(text=f"{settings.TEAM_NAME} • Official Showcase", icon_url=None)
     return embed
+

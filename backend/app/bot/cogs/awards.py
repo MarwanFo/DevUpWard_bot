@@ -87,3 +87,4 @@ class AwardsCog(commands.Cog, name="Hall of Fame"):
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(AwardsCog(bot))
+

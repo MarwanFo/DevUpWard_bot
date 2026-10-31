@@ -163,3 +163,4 @@ class RosterCog(commands.Cog, name="Team Roster"):
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(RosterCog(bot))
+
