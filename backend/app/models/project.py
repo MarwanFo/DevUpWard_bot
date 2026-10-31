@@ -51,3 +51,4 @@ class ProjectUpdate(SQLModel):
 class ProjectRead(ProjectBase):
     id: int
     created_at: datetime
+

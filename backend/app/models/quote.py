@@ -23,3 +23,4 @@ class TeamQuoteCreate(TeamQuoteBase):
 class TeamQuoteRead(TeamQuoteBase):
     id: int
     created_at: datetime
+

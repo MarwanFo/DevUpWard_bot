@@ -25,3 +25,4 @@ class BotSettingRead(SQLModel):
     value: str
     description: Optional[str] = None
     updated_at: datetime
+

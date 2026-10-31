@@ -45,3 +45,4 @@ class TeamMemberUpdate(SQLModel):
 class TeamMemberRead(TeamMemberBase):
     id: int
     created_at: datetime
+

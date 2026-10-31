@@ -39,3 +39,4 @@ class AwardUpdate(SQLModel):
 class AwardRead(AwardBase):
     id: int
     created_at: datetime
+

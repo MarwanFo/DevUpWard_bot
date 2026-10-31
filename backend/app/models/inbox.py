@@ -30,3 +30,4 @@ class ContactSubmissionUpdate(SQLModel):
 class ContactSubmissionRead(ContactSubmissionBase):
     id: int
     created_at: datetime
+
