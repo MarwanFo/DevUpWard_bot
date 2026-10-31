@@ -44,3 +44,4 @@ async def get_team_stats(session: AsyncSession = Depends(get_session)):
         "coffee_cups_consumed": coffee_cups,
         "categories_breakdown": dict(categories),
     }
+

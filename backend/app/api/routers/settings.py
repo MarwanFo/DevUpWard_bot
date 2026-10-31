@@ -44,3 +44,4 @@ async def update_setting(
     await session.commit()
     await session.refresh(setting)
     return setting
+

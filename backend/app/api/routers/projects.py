@@ -107,3 +107,4 @@ async def delete_project(
     await session.delete(project)
     await session.commit()
     return None
+

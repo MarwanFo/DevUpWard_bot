@@ -81,3 +81,4 @@ async def delete_award(
     await session.delete(award)
     await session.commit()
     return None
+

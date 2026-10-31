@@ -28,3 +28,4 @@ async def verify_admin_key(
         detail="Invalid or missing admin authentication key",
         headers={"WWW-Authenticate": "Bearer"},
     )
+

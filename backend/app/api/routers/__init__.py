@@ -18,3 +18,4 @@ api_router.include_router(bot_router)
 api_router.include_router(inbox_router)
 
 __all__ = ["api_router"]
+

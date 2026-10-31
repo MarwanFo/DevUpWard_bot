@@ -28,8 +28,21 @@ class ShowcaseBot(commands.Bot):
     async def setup_hook(self) -> None:
         """Called automatically before the bot connects to Discord Gateway."""
         logger.info("🤖 Bot setup hook triggered. Loading extensions...")
-        # Cogs will be dynamically loaded in Phase 3
-        # e.g., await self.load_extension("app.bot.cogs.identity")
+        cogs_to_load = [
+            "app.bot.cogs.identity",
+            "app.bot.cogs.roster",
+            "app.bot.cogs.projects",
+            "app.bot.cogs.awards",
+            "app.bot.cogs.hospitality",
+            "app.bot.cogs.admin",
+        ]
+        for cog in cogs_to_load:
+            try:
+                await self.load_extension(cog)
+                logger.info(f"  ✓ Loaded cog extension: {cog}")
+            except Exception as e:
+                logger.error(f"  ✗ Failed to load cog {cog}: {e}")
+
 
     async def on_ready(self) -> None:
         self.is_connected_to_gateway = True
@@ -126,3 +139,4 @@ class ShowcaseBot(commands.Bot):
 
 # Global singleton instance of the bot
 bot = ShowcaseBot()
+

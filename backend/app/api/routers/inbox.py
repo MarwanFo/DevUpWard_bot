@@ -83,3 +83,4 @@ async def delete_inquiry(
     await session.delete(submission)
     await session.commit()
     return None
+

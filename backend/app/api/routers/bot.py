@@ -76,3 +76,4 @@ async def sync_slash_commands(
         "synced_count": count,
         "scope": f"guild {guild_id}" if guild_id else "global",
     }
+
