@@ -36,3 +36,8 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ignored Specifications / Notes
+hackathon_team_showcase_bot_specification.md
+
+
