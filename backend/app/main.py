@@ -33,9 +33,15 @@ async def lifespan(app: FastAPI):
     token = settings.DISCORD_BOT_TOKEN
     placeholder_tokens = ["", "your_bot_token_here", "your_discord_bot_token"]
 
+    async def _start_bot():
+        try:
+            await bot.start(token)
+        except Exception as err:
+            logger.error(f"❌ Discord Bot failed to start: {err}", exc_info=True)
+
     if token and token not in placeholder_tokens:
         logger.info("🤖 Starting Discord Bot background worker...")
-        bot_task = asyncio.create_task(bot.start(token))
+        bot_task = asyncio.create_task(_start_bot())
     else:
         logger.warning("⚠️ DISCORD_BOT_TOKEN is not configured or using placeholder. Running in API-only mode.")
 
