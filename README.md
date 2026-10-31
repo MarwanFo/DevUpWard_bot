@@ -135,4 +135,7 @@ cp .env.example .env
 ---
 
 ## 📄 License
-This project is open-source and maintained by the DevUpward hackathon team.
+Copyright © 2026 DevUpward. All Rights Reserved.  
+This software is **proprietary and confidential**. Unauthorized copying, distribution, or modification of this project, in whole or in part, via any medium, is strictly prohibited. See [LICENSE](LICENSE) for details.
+
+
