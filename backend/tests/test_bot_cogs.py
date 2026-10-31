@@ -5,10 +5,12 @@ import sys
 # Ensure backend root is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 try:
-    sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stdout, "reconfigure"):
+        getattr(sys.stdout, "reconfigure")(encoding="utf-8")
 except Exception:
     pass
 
+from typing import cast
 import discord
 from app.bot.client import bot
 from app.bot.cogs.identity import SocialLinksView
@@ -80,11 +82,12 @@ async def test_bot():
     print("✅ 7. ProjectShowroomView - OK (Interactive select dropdown verified)")
 
     # 4. Test Autocomplete functions
-    member_choices = await member_name_autocomplete(DummyInteraction(), current="Mar")
+    interaction_mock = cast(discord.Interaction, DummyInteraction())
+    member_choices = await member_name_autocomplete(interaction_mock, current="Mar")
     assert len(member_choices) >= 1
     print(f"✅ 8. Member Autocomplete - OK (Resolved '{member_choices[0].name}')")
 
-    proj_choices = await project_autocomplete(DummyInteraction(), current="Omni")
+    proj_choices = await project_autocomplete(interaction_mock, current="Omni")
     assert len(proj_choices) >= 1
     print(f"✅ 9. Project Autocomplete - OK (Resolved '{proj_choices[0].name}')")
 

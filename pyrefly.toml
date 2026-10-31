@@ -1,3 +1,4 @@
 # Pyrefly static type checker and language server configuration
 search-path = [".", "backend"]
 python-interpreter-path = "backend/venv/Scripts/python.exe"
+

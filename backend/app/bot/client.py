@@ -51,7 +51,9 @@ class ShowcaseBot(commands.Bot):
 
     async def on_ready(self) -> None:
         self.is_connected_to_gateway = True
-        logger.info(f"✅ Discord Bot logged in as {self.user} (ID: {self.user.id})")
+        user_str = str(self.user) if self.user else "Unknown"
+        user_id = self.user.id if self.user else "N/A"
+        logger.info(f"✅ Discord Bot logged in as {user_str} (ID: {user_id})")
         logger.info(f"🌐 Connected to {len(self.guilds)} guild(s)")
 
         # Set initial presence from settings or default
@@ -133,6 +135,7 @@ class ShowcaseBot(commands.Bot):
 
                 await channel.send(embed=embed)
                 return True
+            return False
         except Exception as e:
             logger.error(f"Failed to dispatch inbox notification to Discord: {e}")
             return False
