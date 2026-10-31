@@ -64,14 +64,15 @@ async def upload_image(
     )
 
     try:
-        # Read file contents
-        contents = await file.read()
+        # Pass file-like stream directly to Cloudinary
+        file.file.seek(0)
         upload_result = cloudinary.uploader.upload(
-            contents,
+            file.file,
             folder=f"devupward/{folder}",
             resource_type="image",
             overwrite=True,
         )
+
 
         return {
             "success": True,
@@ -88,3 +89,4 @@ async def upload_image(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Cloudinary upload failed: {str(e)}",
         )
+
