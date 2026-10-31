@@ -32,7 +32,7 @@ class IdentityCog(commands.Cog, name="Identity"):
         self.presence_index = 0
         self.presence_rotator.start()
 
-    def cog_unload(self):
+    async def cog_unload(self) -> None:
         self.presence_rotator.cancel()
 
     @tasks.loop(minutes=10)

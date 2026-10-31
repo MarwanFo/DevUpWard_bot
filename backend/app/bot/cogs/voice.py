@@ -19,7 +19,7 @@ class Voice(commands.Cog, name="Voice 24/7"):
         self.persistent_channels: Dict[int, int] = {}
         self.voice_reconnect_loop.start()
 
-    def cog_unload(self):
+    async def cog_unload(self) -> None:
         self.voice_reconnect_loop.cancel()
 
     @commands.Cog.listener()
@@ -29,7 +29,7 @@ class Voice(commands.Cog, name="Voice 24/7"):
 
     async def _check_initial_voice_join(self):
         """Connect to default DISCORD_VOICE_CHANNEL_ID if configured."""
-        if not settings.DISCORD_VOICE_CHANNEL_ID or not str(settings.DISCORD_VOICE_CHANNEL_ID).isdigit():
+        if not settings.DISCORD_VOICE_CHANNEL_ID or not settings.DISCORD_VOICE_CHANNEL_ID.isdigit():
             return
 
         channel_id = int(settings.DISCORD_VOICE_CHANNEL_ID)
