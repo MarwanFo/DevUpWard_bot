@@ -4,8 +4,13 @@ import time
 from typing import Optional
 import discord
 from discord.ext import commands
-from app.core.config import settings
-from app.models.inbox import ContactSubmission
+try:
+    from app.core.config import settings
+    from app.models.inbox import ContactSubmission
+except ImportError:
+    from backend.app.core.config import settings
+    from backend.app.models.inbox import ContactSubmission
+
 
 logger = logging.getLogger("bot")
 logging.basicConfig(level=logging.INFO)
