@@ -55,6 +55,16 @@ class ShowcaseBot(commands.Bot):
             activity_type="watching"
         )
 
+        # Auto-sync commands instantly to guilds or globally
+        try:
+            if settings.DISCORD_GUILD_ID and settings.DISCORD_GUILD_ID.isdigit():
+                await self.sync_app_commands(guild_id=int(settings.DISCORD_GUILD_ID))
+            else:
+                await self.sync_app_commands()
+        except Exception as e:
+            logger.warning(f"Initial command sync warning: {e}")
+
+
     async def set_presence(self, status_text: str, activity_type: str = "watching") -> None:
         """Update the bot's dynamic rich presence."""
         if not self.is_ready():
