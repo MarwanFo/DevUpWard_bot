@@ -35,7 +35,8 @@ def start():
     try:
         port_env = os.environ.get("SERVER_PORT") or os.environ.get("PORT")
         port = int(port_env) if port_env and port_env.isdigit() else settings.API_PORT
-        host = os.environ.get("SERVER_IP", "0.0.0.0")
+        # Always bind to 0.0.0.0 inside containers (binding to SERVER_IP causes Errno 99)
+        host = "0.0.0.0"
 
         print(f"🚀 Starting DevUpward Showcase Server on {host}:{port}...", flush=True)
         from app.main import app
