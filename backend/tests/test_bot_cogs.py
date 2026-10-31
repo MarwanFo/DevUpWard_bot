@@ -38,7 +38,11 @@ async def test_bot():
     commands = bot.tree.get_commands()
     cmd_names = [c.name for c in commands]
     print(f"✅ 2. App Command Tree verified: {len(cmd_names)} commands registered: {cmd_names}")
-    expected_cmds = ["about", "socials", "team", "member", "projects", "project", "awards", "stats", "contact", "quote", "sync", "reload_cogs"]
+    expected_cmds = [
+        "about", "socials", "team", "member", "projects", "project",
+        "awards", "stats", "contact", "quote", "sync", "reload_cogs",
+        "join", "leave", "voice_status"
+    ]
     for expected in expected_cmds:
         assert expected in cmd_names, f"Missing command: {expected}"
 

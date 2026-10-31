@@ -39,6 +39,7 @@ class ShowcaseBot(commands.Bot):
             "app.bot.cogs.projects",
             "app.bot.cogs.awards",
             "app.bot.cogs.hospitality",
+            "app.bot.cogs.voice",
             "app.bot.cogs.admin",
         ]
         for cog in cogs_to_load:

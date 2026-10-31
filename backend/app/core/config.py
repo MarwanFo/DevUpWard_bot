@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     # Automated Channels
     DISCORD_WELCOME_CHANNEL_ID: Optional[str] = None
     DISCORD_INBOX_CHANNEL_ID: Optional[str] = None
+    DISCORD_VOICE_CHANNEL_ID: Optional[str] = None
 
     # API Configuration
     API_HOST: str = "0.0.0.0"
