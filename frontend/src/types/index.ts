@@ -83,3 +83,4 @@ export interface TeamStats {
   coffee_cups_consumed: number;
   categories_breakdown: Record<string, number>;
 }
+

@@ -22,6 +22,13 @@ async def run_tests():
         assert data["status"] == "healthy"
         print("✅ 1. GET /health - OK (Service healthy, bot telemetry included)")
 
+        # 1.1 Static SPA Mount test
+        spa_res = await client.get("/")
+        if spa_res.status_code == 200:
+            assert "<!doctype html>" in spa_res.text.lower()
+            print("✅ 1.1 GET / (SPA Mount) - OK (Single-port React index.html served)")
+
+
         # 2. Team list
         res = await client.get("/api/v1/team")
         assert res.status_code == 200, f"Team list failed: {res.text}"

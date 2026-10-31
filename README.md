@@ -90,43 +90,67 @@ cp .env.example .env
 
 ---
 
-### 2. Backend Setup
-1. Activate the Python virtual environment:
-   ```bash
-   # Windows PowerShell:
-   .\backend\venv\Scripts\Activate.ps1
-   # Linux / macOS:
-   source backend/venv/bin/activate
-   ```
-2. Install dependencies (if not already installed):
-   ```bash
-   pip install -r backend/requirements.txt
-   ```
-3. Run the backend service:
-   ```bash
-   python -m backend.app.main
-   ```
+### 2. Quick Launch (Development Mode)
+Run both the Python backend and React frontend concurrently with one command:
+```bash
+# Windows PowerShell:
+.\start_dev.ps1
+
+# Windows Command Prompt:
+start_dev.bat
+```
+
+Or run them individually:
+* **Backend:**
+  ```bash
+  .\backend\venv\Scripts\Activate.ps1
+  python backend/app/main.py
+  ```
+* **Frontend:**
+  ```bash
+  cd frontend
+  npm run dev
+  ```
+  Open `http://localhost:3000` in your browser. All `/api` requests proxy to `http://localhost:8000`.
 
 ---
 
-### 3. Frontend Dashboard Setup
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install packages:
-   ```bash
-   npm install
-   ```
-3. Launch the development server:
-   ```bash
-   npm run dev
-   ```
-   Open `http://localhost:3000` in your browser. All `/api` requests are automatically proxied to the FastAPI backend at `http://localhost:8000`.
+### 3. Docker Deployment (Single-Port Production Mode)
+The repository includes a multi-stage `Dockerfile` and `docker-compose.yml`. In production, the React dashboard is built and mounted directly into FastAPI, allowing the **Bot Gateway, REST API, and Web UI** to run from a single container on port `8000`:
+```bash
+docker compose up -d --build
+```
+* **Web Dashboard & API:** `http://localhost:8000`
+* **API Documentation:** `http://localhost:8000/docs`
+* **Data Persistence:** `./data` is mounted to `/app/data` to preserve your SQLite database across container upgrades.
+
+---
+
+### 4. Portfolio Data Backup & Migration
+Export or restore your team members, projects, awards, and settings into a single JSON file:
+```bash
+# Export all data to JSON:
+python backend/backup.py export my_portfolio_backup.json
+
+# Restore data from JSON backup:
+python backend/backup.py import my_portfolio_backup.json
+```
+
+---
+
+### 5. Discord Developer Portal Setup
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and create a New Application.
+2. Under **Bot**, click **Reset Token** and copy your token into `DISCORD_BOT_TOKEN` in `.env`.
+3. Under **Privileged Gateway Intents**, enable **Server Members Intent** (required for onboarding welcome messages).
+4. Under **OAuth2 > URL Generator**:
+   * Scopes: `bot`, `applications.commands`
+   * Permissions: `Send Messages`, `Embed Links`, `Attach Files`, `Read Message History`, `Use Slash Commands`
+5. Open the generated URL in your browser to invite the bot to your server.
 
 ---
 
 ## 🛠️ Tech Stack
+
 
 * **Backend:** Python 3.13, `discord.py` 2.7, `FastAPI` 0.115, `SQLModel` 0.0.48, `aiosqlite` 0.22, `Uvicorn`
 * **Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4, Lucide React, Axios

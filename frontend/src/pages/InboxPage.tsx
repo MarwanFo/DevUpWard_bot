@@ -187,3 +187,4 @@ export const InboxPage: React.FC = () => {
 };
 
 export default InboxPage;
+

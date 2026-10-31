@@ -82,6 +82,31 @@ async def health_check():
     }
 
 
+# Serve React SPA in production if built
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+frontend_dist = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/dist"))
+if os.path.exists(frontend_dist):
+    assets_dir = os.path.join(frontend_dist, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        # Exclude API endpoints, docs, and health from catch-all
+        if full_path.startswith(("api", "health", "docs", "openapi.json")):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        index_file = os.path.join(frontend_dist, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Frontend build index.html not found")
+
+
+
 if __name__ == "__main__":
     import uvicorn
 
