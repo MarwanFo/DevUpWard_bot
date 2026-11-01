@@ -29,6 +29,13 @@ async def lifespan(app: FastAPI):
     await init_db()
     logger.info("💾 Database verified.")
 
+    # 1.1 Auto-seed default showcase data if database is fresh/empty
+    try:
+        from seed import seed_data
+        await seed_data()
+    except Exception as e:
+        logger.warning(f"Database auto-seed check: {e}")
+
     # 2. Launch Discord Bot in background task if token is set
     token = settings.DISCORD_BOT_TOKEN
     placeholder_tokens = ["", "your_bot_token_here", "your_discord_bot_token"]
