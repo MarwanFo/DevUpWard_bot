@@ -94,17 +94,19 @@ class Voice(commands.Cog, name="Voice 24/7"):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-        """Immediately trigger reconnect if bot is disconnected while 24/7 is active."""
+        """Handle voice state changes for the bot."""
         if self.bot.user and member.id == self.bot.user.id:
             guild_id = member.guild.id
-            target_channel_id = self.persistent_channels.get(guild_id)
-            if target_channel_id and (after.channel is None or after.channel.id != target_channel_id):
-                # Bot was moved or disconnected; wait 2s and reconnect
-                await asyncio.sleep(2)
-                channel = member.guild.get_channel(target_channel_id)
-                if isinstance(channel, discord.VoiceChannel):
-                    logger.info(f"⚡ Instant reconnect triggered for 24/7 voice: {channel.name}")
-                    await self._ensure_connected(channel)
+            # If the bot was disconnected from voice (e.g. user disconnected or kicked it)
+            if after.channel is None:
+                if guild_id in self.persistent_channels:
+                    logger.info(f"🛑 Bot was disconnected from voice in guild {guild_id}. Stopping 24/7 auto-reconnect.")
+                    self.persistent_channels.pop(guild_id, None)
+            # If the bot was moved to a different voice channel by a user/moderator
+            elif after.channel is not None and isinstance(after.channel, discord.VoiceChannel):
+                if guild_id in self.persistent_channels and after.channel.id != self.persistent_channels[guild_id]:
+                    logger.info(f"🔄 Bot was moved to voice channel: {after.channel.name}. Updating 24/7 target.")
+                    self.persistent_channels[guild_id] = after.channel.id
 
     @app_commands.command(name="join", description="Join a voice channel and maintain 24/7 presence")
     @app_commands.describe(channel="The voice channel to join (optional - defaults to your current channel)")
