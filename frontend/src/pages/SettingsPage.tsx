@@ -14,6 +14,9 @@ export const SettingsPage: React.FC = () => {
   const [adminKey, setAdminKey] = useState(
     localStorage.getItem('devupward_admin_key') || 'dev_admin_key_12345'
   );
+  const [apiUrl, setApiUrl] = useState(
+    localStorage.getItem('devupward_api_url') || ''
+  );
 
   const fetchSettings = async () => {
     try {
@@ -47,8 +50,13 @@ export const SettingsPage: React.FC = () => {
       );
       await Promise.all(promises);
 
-      // Save admin key to local storage
+      // Save admin key and API url to local storage
       localStorage.setItem('devupward_admin_key', adminKey);
+      if (apiUrl.trim()) {
+        localStorage.setItem('devupward_api_url', apiUrl.trim());
+      } else {
+        localStorage.removeItem('devupward_api_url');
+      }
 
       setSaveMsg('✅ All settings saved successfully! Bot and web configs updated.');
     } catch (err: any) {
@@ -305,7 +313,21 @@ export const SettingsPage: React.FC = () => {
               🔐 Admin Security & Discord Synchronization
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-start">
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Target Server URL</label>
+                <input
+                  type="text"
+                  value={apiUrl}
+                  onChange={(e) => setApiUrl(e.target.value)}
+                  placeholder="e.g. http://78.154.103.27:14074"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500 font-mono"
+                />
+                <span className="text-[11px] text-slate-500 mt-1 block">
+                  Connect local dashboard to remote WispByte server (leave empty for local).
+                </span>
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1">Admin API Key</label>
                 <input

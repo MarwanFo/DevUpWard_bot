@@ -9,15 +9,24 @@ import {
   TeamStats,
 } from '../types';
 
+const getBaseUrl = () => {
+  const saved = typeof window !== 'undefined' ? localStorage.getItem('devupward_api_url') : null;
+  return saved || import.meta.env.VITE_API_URL || '';
+};
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: `${getBaseUrl()}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor to attach admin key from localStorage
+// Interceptor to attach admin key and dynamic target server URL
 api.interceptors.request.use((config) => {
+  const customUrl = localStorage.getItem('devupward_api_url');
+  if (customUrl) {
+    config.baseURL = `${customUrl.replace(/\/+$/, '')}/api/v1`;
+  }
   const adminKey = localStorage.getItem('devupward_admin_key') || 'dev_admin_key_12345';
   config.headers['X-Admin-Key'] = adminKey;
   return config;
@@ -25,7 +34,11 @@ api.interceptors.request.use((config) => {
 
 export const ApiService = {
   // Telemetry & Stats
-  getHealth: () => axios.get('/health'),
+  getHealth: () => {
+    const base = typeof window !== 'undefined' ? localStorage.getItem('devupward_api_url') : '';
+    const cleanBase = base ? base.replace(/\/+$/, '') : '';
+    return axios.get(`${cleanBase}/health`);
+  },
   getBotStatus: () => api.get<BotTelemetry>('/bot/status'),
   updatePresence: (status_text: string, activity_type: string = 'watching') =>
     api.post('/bot/presence', { status_text, activity_type }),
