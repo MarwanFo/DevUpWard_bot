@@ -70,11 +70,24 @@ class Voice(commands.Cog, name="Voice 24/7"):
             elif after.channel is not None and isinstance(after.channel, discord.VoiceChannel):
                 logger.info(f"🔄 Bot is in voice channel: {after.channel.name}")
 
-    @app_commands.command(name="join", description="Join a voice channel and maintain 24/7 presence")
+    @app_commands.command(name="join", description="Join a voice channel and maintain 24/7 presence (Admin only)")
     @app_commands.describe(channel="The voice channel to join (optional - defaults to your current channel)")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def join(self, interaction: discord.Interaction, channel: Optional[discord.VoiceChannel] = None):
         """Join a voice channel and stay 24/7 until manually disconnected or /leave."""
         await interaction.response.defer(ephemeral=False)
+
+        # Explicit admin check
+        if isinstance(interaction.user, discord.Member) and not interaction.user.guild_permissions.administrator:
+            embed = create_base_embed(
+                title="⛔ Permission Denied",
+                description="Only server **Administrators** can manage voice presence.",
+                color=discord.Color.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
         brand_color = await get_brand_color()
 
         target_channel: Optional[discord.VoiceChannel] = channel
@@ -125,10 +138,23 @@ class Voice(commands.Cog, name="Voice 24/7"):
             )
             await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="leave", description="Disconnect the bot from voice")
+    @app_commands.command(name="leave", description="Disconnect the bot from voice (Admin only)")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def leave(self, interaction: discord.Interaction):
         """Disconnect the bot from voice."""
         await interaction.response.defer(ephemeral=False)
+
+        # Explicit admin check
+        if isinstance(interaction.user, discord.Member) and not interaction.user.guild_permissions.administrator:
+            embed = create_base_embed(
+                title="⛔ Permission Denied",
+                description="Only server **Administrators** can manage voice presence.",
+                color=discord.Color.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
         brand_color = await get_brand_color()
 
         if not interaction.guild:
@@ -179,6 +205,21 @@ class Voice(commands.Cog, name="Voice 24/7"):
             embed.add_field(name="Action", value="Use `/join` to connect the bot to voice.", inline=False)
 
         await interaction.response.send_message(embed=embed)
+
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        """Handle permission errors gracefully for restricted commands."""
+        if isinstance(error, app_commands.MissingPermissions):
+            embed = create_base_embed(
+                title="⛔ Permission Denied",
+                description="Only server **Administrators** can use this command.",
+                color=discord.Color.red(),
+            )
+            if interaction.response.is_done():
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            else:
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+        else:
+            logger.error(f"Voice app command error: {error}")
 
 
 async def setup(bot: commands.Bot):

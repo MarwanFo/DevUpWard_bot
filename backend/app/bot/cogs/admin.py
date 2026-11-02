@@ -12,6 +12,7 @@ COGS_LIST = [
     "app.bot.cogs.projects",
     "app.bot.cogs.awards",
     "app.bot.cogs.hospitality",
+    "app.bot.cogs.voice",
     "app.bot.cogs.admin",
 ]
 
