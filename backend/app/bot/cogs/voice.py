@@ -1,9 +1,8 @@
-import asyncio
 import logging
-from typing import Dict, Optional
+from typing import Optional
 import discord
 from discord import app_commands
-from discord.ext import commands, tasks
+from discord.ext import commands
 from app.bot.utils import create_base_embed, get_brand_color
 from app.core.config import settings
 
@@ -15,20 +14,17 @@ class Voice(commands.Cog, name="Voice 24/7"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Maps guild_id -> target voice channel_id for 24/7 persistence
-        self.persistent_channels: Dict[int, int] = {}
-        self.voice_reconnect_loop.start()
 
     async def cog_unload(self) -> None:
-        self.voice_reconnect_loop.cancel()
+        pass
 
     @commands.Cog.listener()
     async def on_ready(self):
-        """Auto-join configured voice channel from settings on bot ready."""
+        """Auto-join configured voice channel on bot startup if specified in .env."""
         await self._check_initial_voice_join()
 
     async def _check_initial_voice_join(self):
-        """Connect to default DISCORD_VOICE_CHANNEL_ID if configured."""
+        """Connect to default DISCORD_VOICE_CHANNEL_ID if configured on boot."""
         if not settings.DISCORD_VOICE_CHANNEL_ID or not settings.DISCORD_VOICE_CHANNEL_ID.isdigit():
             return
 
@@ -40,9 +36,8 @@ class Voice(commands.Cog, name="Voice 24/7"):
                 channel = await self.bot.fetch_channel(channel_id)
 
             if isinstance(channel, discord.VoiceChannel):
-                self.persistent_channels[channel.guild.id] = channel.id
                 await self._ensure_connected(channel)
-                logger.info(f"🔊 Auto-joined 24/7 voice channel: {channel.name} in {channel.guild.name}")
+                logger.info(f"🔊 Auto-joined voice channel on startup: {channel.name} in {channel.guild.name}")
         except Exception as e:
             logger.error(f"Failed to auto-join initial voice channel {channel_id}: {e}")
 
@@ -64,54 +59,21 @@ class Voice(commands.Cog, name="Voice 24/7"):
             logger.error(f"Error ensuring connection to voice channel {channel.id}: {err_msg}")
             return None, err_msg
 
-    @tasks.loop(seconds=20)
-    async def voice_reconnect_loop(self):
-        """Keep-alive watchdog: ensures the bot stays in the 24/7 voice channel."""
-        if not self.bot.is_ready():
-            return
-
-        for guild_id, channel_id in list(self.persistent_channels.items()):
-            try:
-                guild = self.bot.get_guild(guild_id)
-                if not guild:
-                    continue
-
-                vc: Optional[discord.VoiceClient] = getattr(guild, "voice_client", None)
-                if vc is None or not vc.is_connected() or vc.channel is None or vc.channel.id != channel_id:
-                    channel = guild.get_channel(channel_id)
-                    if isinstance(channel, discord.VoiceChannel):
-                        logger.info(f"🔄 Reconnecting to 24/7 voice channel: {channel.name}")
-                        await self._ensure_connected(channel)
-            except Exception as e:
-                logger.warning(f"Voice watchdog error for guild {guild_id}: {e}")
-
-    @voice_reconnect_loop.before_loop
-    async def before_reconnect_loop(self):
-        try:
-            await self.bot.wait_until_ready()
-        except (RuntimeError, asyncio.CancelledError):
-            pass
-
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         """Handle voice state changes for the bot."""
         if self.bot.user and member.id == self.bot.user.id:
             guild_id = member.guild.id
-            # If the bot was disconnected from voice (e.g. user disconnected or kicked it)
             if after.channel is None:
-                if guild_id in self.persistent_channels:
-                    logger.info(f"🛑 Bot was disconnected from voice in guild {guild_id}. Stopping 24/7 auto-reconnect.")
-                    self.persistent_channels.pop(guild_id, None)
-            # If the bot was moved to a different voice channel by a user/moderator
+                # User or moderator disconnected the bot — respect it and stay disconnected!
+                logger.info(f"🛑 Bot was disconnected from voice in guild {guild_id}. Staying disconnected.")
             elif after.channel is not None and isinstance(after.channel, discord.VoiceChannel):
-                if guild_id in self.persistent_channels and after.channel.id != self.persistent_channels[guild_id]:
-                    logger.info(f"🔄 Bot was moved to voice channel: {after.channel.name}. Updating 24/7 target.")
-                    self.persistent_channels[guild_id] = after.channel.id
+                logger.info(f"🔄 Bot is in voice channel: {after.channel.name}")
 
     @app_commands.command(name="join", description="Join a voice channel and maintain 24/7 presence")
     @app_commands.describe(channel="The voice channel to join (optional - defaults to your current channel)")
     async def join(self, interaction: discord.Interaction, channel: Optional[discord.VoiceChannel] = None):
-        """Join a voice channel and enable 24/7 keep-alive mode."""
+        """Join a voice channel and stay 24/7 until manually disconnected or /leave."""
         await interaction.response.defer(ephemeral=False)
         brand_color = await get_brand_color()
 
@@ -142,20 +104,16 @@ class Voice(commands.Cog, name="Voice 24/7"):
                 await interaction.followup.send(embed=embed)
                 return
 
-            # Activate 24/7 tracking for this guild
-            if interaction.guild_id:
-                self.persistent_channels[interaction.guild_id] = target_channel.id
-
             embed = create_base_embed(
                 title="🔊 Connected to Voice Channel",
-                description=f"Successfully joined **{target_channel.mention}** with **24/7 Keep-Alive Mode Active**!",
+                description=f"Successfully joined **{target_channel.mention}**! Bot will stay connected 24/7 until disconnected.",
                 color=brand_color,
             )
             embed.add_field(name="Channel", value=target_channel.name, inline=True)
             embed.add_field(name="Bitrate", value=f"{target_channel.bitrate // 1000} kbps", inline=True)
-            embed.add_field(name="24/7 Mode", value="🟢 **Enabled** (Auto-Reconnect ON)", inline=True)
+            embed.add_field(name="Presence", value="🟢 **24/7 Active**", inline=True)
             embed.add_field(name="Self Deafen", value="🎧 Enabled (Bandwidth Optimized)", inline=True)
-            embed.set_footer(text="DevUpward Showcase • 24/7 Voice Presence")
+            embed.set_footer(text="DevUpward Showcase • Type /leave or disconnect to remove bot")
 
             await interaction.followup.send(embed=embed)
         except Exception as e:
@@ -167,9 +125,9 @@ class Voice(commands.Cog, name="Voice 24/7"):
             )
             await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="leave", description="Disconnect the bot from voice and disable 24/7 mode")
+    @app_commands.command(name="leave", description="Disconnect the bot from voice")
     async def leave(self, interaction: discord.Interaction):
-        """Disconnect the bot from voice and stop 24/7 mode."""
+        """Disconnect the bot from voice."""
         await interaction.response.defer(ephemeral=False)
         brand_color = await get_brand_color()
 
@@ -177,17 +135,13 @@ class Voice(commands.Cog, name="Voice 24/7"):
             await interaction.followup.send("This command can only be used in a server.", ephemeral=True)
             return
 
-        guild_id = interaction.guild.id
-        # Stop 24/7 monitoring
-        self.persistent_channels.pop(guild_id, None)
-
         vc: Optional[discord.VoiceClient] = getattr(interaction.guild, "voice_client", None)
         if vc and vc.is_connected():
             channel_name = vc.channel.name if vc.channel else "Voice Channel"
             await vc.disconnect(force=True)
             embed = create_base_embed(
                 title="👋 Disconnected from Voice",
-                description=f"Disconnected from **{channel_name}**. 24/7 keep-alive mode disabled.",
+                description=f"Disconnected from **{channel_name}**.",
                 color=brand_color,
             )
         else:
@@ -199,7 +153,7 @@ class Voice(commands.Cog, name="Voice 24/7"):
 
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="voice_status", description="Check the current 24/7 voice connection status")
+    @app_commands.command(name="voice_status", description="Check the current voice connection status")
     async def voice_status(self, interaction: discord.Interaction):
         """Check voice connection telemetry."""
         brand_color = await get_brand_color()
@@ -207,9 +161,7 @@ class Voice(commands.Cog, name="Voice 24/7"):
             await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
             return
 
-        guild_id = interaction.guild.id
         vc: Optional[discord.VoiceClient] = getattr(interaction.guild, "voice_client", None)
-        is_247 = guild_id in self.persistent_channels
 
         embed = create_base_embed(
             title="🎙️ Voice System Telemetry",
@@ -217,18 +169,14 @@ class Voice(commands.Cog, name="Voice 24/7"):
         )
 
         if vc and vc.is_connected() and vc.channel:
-            embed.add_field(name="Status", value="🟢 **Connected**", inline=True)
+            embed.add_field(name="Status", value="🟢 **Connected (24/7)**", inline=True)
             embed.add_field(name="Current Channel", value=vc.channel.name, inline=True)
             latency_ms = round(vc.latency * 1000, 1) if hasattr(vc, "latency") else "N/A"
             embed.add_field(name="Voice Latency", value=f"{latency_ms} ms", inline=True)
-            embed.add_field(name="24/7 Keep-Alive", value="🟢 **Active**" if is_247 else "⚪ Inactive", inline=True)
             embed.add_field(name="Bitrate", value=f"{vc.channel.bitrate // 1000} kbps" if hasattr(vc.channel, "bitrate") else "N/A", inline=True)
         else:
             embed.add_field(name="Status", value="⚪ **Disconnected**", inline=True)
-            target_id = self.persistent_channels.get(guild_id)
-            target_name = f"<#{target_id}>" if target_id else "None"
-            embed.add_field(name="24/7 Target Channel", value=target_name, inline=True)
-            embed.add_field(name="Action", value="Use `/join` to start 24/7 voice presence.", inline=False)
+            embed.add_field(name="Action", value="Use `/join` to connect the bot to voice.", inline=False)
 
         await interaction.response.send_message(embed=embed)
 
